@@ -1,0 +1,173 @@
+/*
+ * Copyright (c) 2014, 2017, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
+ */
+package com.oracle.svm.hosted.phases;
+
+import org.graalvm.compiler.core.common.type.Stamp;
+import org.graalvm.compiler.core.common.type.StampFactory;
+import org.graalvm.compiler.core.common.type.StampPair;
+import org.graalvm.compiler.debug.DebugContext;
+import org.graalvm.compiler.java.GraphBuilderPhase.Instance;
+import org.graalvm.compiler.nodes.AbstractBeginNode;
+import org.graalvm.compiler.nodes.AbstractMergeNode;
+import org.graalvm.compiler.nodes.CallTargetNode.InvokeKind;
+import org.graalvm.compiler.nodes.ConstantNode;
+import org.graalvm.compiler.nodes.IfNode;
+import org.graalvm.compiler.nodes.LogicNode;
+import org.graalvm.compiler.nodes.NodeView;
+import org.graalvm.compiler.nodes.PiNode;
+import org.graalvm.compiler.nodes.ProfileData.BranchProbabilityData;
+import org.graalvm.compiler.nodes.UnwindNode;
+import org.graalvm.compiler.nodes.ValueNode;
+import org.graalvm.compiler.nodes.calc.IsNullNode;
+import org.graalvm.compiler.nodes.extended.BranchProbabilityNode;
+import org.graalvm.compiler.nodes.extended.BytecodeExceptionNode;
+import org.graalvm.compiler.nodes.extended.GuardingNode;
+import org.graalvm.compiler.nodes.graphbuilderconf.GraphBuilderConfiguration;
+import org.graalvm.compiler.nodes.graphbuilderconf.IntrinsicContext;
+import org.graalvm.compiler.nodes.java.ExceptionObjectNode;
+import org.graalvm.compiler.nodes.java.LoadFieldNode;
+import org.graalvm.compiler.nodes.java.MethodCallTargetNode;
+import org.graalvm.compiler.nodes.type.StampTool;
+import org.graalvm.compiler.phases.OptimisticOptimizations;
+import org.graalvm.compiler.phases.util.Providers;
+
+import com.oracle.graal.pointsto.meta.AnalysisMethod;
+import com.oracle.graal.pointsto.meta.AnalysisType;
+import com.oracle.graal.pointsto.meta.HostedProviders;
+import com.oracle.svm.core.c.BoxedRelocatedPointer;
+import com.oracle.svm.core.classinitialization.EnsureClassInitializedNode;
+import com.oracle.svm.core.graal.code.SubstrateCompilationIdentifier;
+import com.oracle.svm.core.graal.nodes.DeadEndNode;
+import com.oracle.svm.core.graal.replacements.SubstrateGraphKit;
+import com.oracle.svm.core.util.ExceptionHelpers;
+import com.oracle.svm.core.util.VMError;
+import com.oracle.svm.hosted.meta.HostedMethod;
+import com.oracle.svm.hosted.nodes.SubstrateMethodCallTargetNode;
+
+import jdk.vm.ci.meta.JavaKind;
+import jdk.vm.ci.meta.ResolvedJavaField;
+import jdk.vm.ci.meta.ResolvedJavaMethod;
+import jdk.vm.ci.meta.ResolvedJavaType;
+
+public class HostedGraphKit extends SubstrateGraphKit {
+
+    public HostedGraphKit(DebugContext debug, HostedProviders providers, ResolvedJavaMethod method) {
+        super(debug, method, providers, providers.getWordTypes(), providers.getGraphBuilderPlugins(), new SubstrateCompilationIdentifier());
+    }
+
+    @Override
+    protected MethodCallTargetNode createMethodCallTarget(InvokeKind invokeKind, ResolvedJavaMethod targetMethod, ValueNode[] args, StampPair returnStamp, int bci) {
+        ResolvedJavaMethod method = graph.method();
+        if (method instanceof HostedMethod) {
+            return new SubstrateMethodCallTargetNode(invokeKind, targetMethod, args, returnStamp, ((HostedMethod) method).getProfilingInfo(), bci);
+        } else {
+            return super.createMethodCallTarget(invokeKind, targetMethod, args, returnStamp, bci);
+        }
+    }
+
+    @Override
+    protected Instance createGraphBuilderInstance(Providers theProviders, GraphBuilderConfiguration graphBuilderConfig, OptimisticOptimizations optimisticOpts,
+                    IntrinsicContext initialIntrinsicContext) {
+
+        ResolvedJavaMethod method = graph.method();
+        if (method instanceof AnalysisMethod) {
+            return new AnalysisGraphBuilderPhase(theProviders, graphBuilderConfig, optimisticOpts, initialIntrinsicContext, wordTypes);
+        } else if (method instanceof HostedMethod) {
+            return new HostedGraphBuilderPhase(theProviders, graphBuilderConfig, optimisticOpts, initialIntrinsicContext, wordTypes);
+        } else {
+            throw VMError.shouldNotReachHere();
+        }
+    }
+
+    public void emitEnsureInitializedCall(ResolvedJavaType type) {
+        if (SubstrateClassInitializationPlugin.needsRuntimeInitialization(graph.method().getDeclaringClass(), type)) {
+            ValueNode hub = createConstant(getConstantReflection().asJavaClass(type), JavaKind.Object);
+            int bci = bci();
+            EnsureClassInitializedNode ensureInitializedNode = append(new EnsureClassInitializedNode(hub));
+            ensureInitializedNode.setStateAfter(getFrameState().create(bci, ensureInitializedNode));
+
+            AbstractBeginNode noExceptionEdge = add(ensureInitializedNode.createNextBegin());
+            ensureInitializedNode.setNext(noExceptionEdge);
+            ExceptionObjectNode exceptionEdge = createExceptionObjectNode(getFrameState(), bci);
+            ensureInitializedNode.setExceptionEdge(exceptionEdge);
+
+            lastFixedNode = exceptionEdge;
+            append(new UnwindNode(exceptionEdge));
+
+            assert lastFixedNode == null;
+            lastFixedNode = noExceptionEdge;
+        }
+    }
+
+    public void throwInvocationTargetException(ValueNode exception) {
+        ResolvedJavaMethod throwInvocationTargetException = findMethod(ExceptionHelpers.class, "throwInvocationTargetException", true);
+        createJavaCallWithExceptionAndUnwind(InvokeKind.Static, throwInvocationTargetException, exception);
+        append(new DeadEndNode());
+    }
+
+    public LoadFieldNode createLoadFieldNode(ConstantNode receiver, Class<BoxedRelocatedPointer> clazz, String fieldName) {
+        try {
+            ResolvedJavaType type = providers.getMetaAccess().lookupJavaType(clazz);
+            if (type instanceof AnalysisType) {
+                ((AnalysisType) type).registerAsReachable();
+            }
+            ResolvedJavaField field = providers.getMetaAccess().lookupJavaField(clazz.getDeclaredField(fieldName));
+            return LoadFieldNode.createOverrideStamp(StampPair.createSingle(wordStamp((ResolvedJavaType) field.getType())), receiver, field);
+        } catch (NoSuchFieldException e) {
+            throw VMError.shouldNotReachHere(e);
+        }
+    }
+
+    public GuardingNode createCheckThrowingBytecodeException(LogicNode condition, boolean failOnTrue, BytecodeExceptionNode.BytecodeExceptionKind exceptionKind, ValueNode... arguments) {
+        BranchProbabilityData trueProbability = failOnTrue ? BranchProbabilityNode.SLOW_PATH_PROFILE : BranchProbabilityNode.FAST_PATH_PROFILE;
+        IfNode ifNode = startIf(condition, trueProbability);
+        if (failOnTrue) {
+            thenPart();
+        } else {
+            elsePart();
+        }
+        BytecodeExceptionNode exception = createBytecodeExceptionObjectNode(exceptionKind, true, arguments);
+        append(new UnwindNode(exception));
+        AbstractMergeNode merge = endIf();
+        assert merge == null;
+        return failOnTrue ? ifNode.falseSuccessor() : ifNode.trueSuccessor();
+    }
+
+    public BytecodeExceptionNode createBytecodeExceptionObjectNode(BytecodeExceptionNode.BytecodeExceptionKind exceptionKind, boolean rethrow, ValueNode... arguments) {
+        BytecodeExceptionNode exception = append(new BytecodeExceptionNode(getMetaAccess(), exceptionKind, arguments));
+        setStateAfterException(getFrameState(), bci(), exception, rethrow);
+        return exception;
+    }
+
+    public ValueNode maybeCreateExplicitNullCheck(ValueNode object) {
+        assert object.stamp(NodeView.DEFAULT).isPointerStamp();
+        if (StampTool.isPointerNonNull(object)) {
+            return object;
+        }
+        createCheckThrowingBytecodeException(IsNullNode.create(object), true, BytecodeExceptionNode.BytecodeExceptionKind.NULL_POINTER);
+        Stamp nonNullStamp = object.stamp(NodeView.DEFAULT).join(StampFactory.objectNonNull());
+        return append(PiNode.create(object, nonNullStamp));
+    }
+}
