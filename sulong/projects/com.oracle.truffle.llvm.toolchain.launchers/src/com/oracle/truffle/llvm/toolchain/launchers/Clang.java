@@ -34,9 +34,16 @@ import static com.oracle.truffle.llvm.toolchain.launchers.common.Driver.OS;
 import com.oracle.truffle.llvm.toolchain.launchers.common.ClangLike;
 import com.oracle.truffle.llvm.toolchain.launchers.darwin.DarwinClangLike;
 
+import java.util.Arrays;
+
 public final class Clang {
 
     public static void main(String[] args) {
+        System.out.println("sulong入口");
+        System.out.println("OS=" + OS.getCurrent().name());
+        if(args != null){
+            Arrays.stream(args).forEach(t->System.out.print(t + " "));
+        }
         if (OS.getCurrent() == OS.DARWIN) {
             DarwinClangLike.runClang(args);
         } else {
