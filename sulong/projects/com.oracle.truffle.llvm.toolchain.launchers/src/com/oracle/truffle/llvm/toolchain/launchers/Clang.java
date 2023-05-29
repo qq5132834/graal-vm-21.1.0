@@ -44,6 +44,7 @@ public final class Clang {
         if(args != null){
             Arrays.stream(args).forEach(t->System.out.print(t + " "));
         }
+        System.out.println();
         if (OS.getCurrent() == OS.DARWIN) {
             DarwinClangLike.runClang(args);
         } else {
