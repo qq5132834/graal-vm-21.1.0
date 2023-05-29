@@ -114,6 +114,8 @@ public class Driver {
 
     public Path getSulongHome() {
         final Path sulongHome = HomeFinder.getInstance().getLanguageHomes().get("llvm");
+        String sulongHomeCls = sulongHome.getClass().getName();
+        System.out.println("sulongHomeCls:" + sulongHomeCls + ",path:" + sulongHome.toString());
         if (sulongHome != null) {
             return sulongHome;
         }
