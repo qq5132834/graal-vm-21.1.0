@@ -99,6 +99,7 @@ public class Driver {
 
     public Path getLLVMBinDir() {
         final String property = System.getProperty("llvm.bin.dir");
+        System.out.println("属性-Dllvm.bin.dir="+property);
         if (property != null) {
             return Paths.get(property);
         }
