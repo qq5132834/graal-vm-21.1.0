@@ -80,8 +80,9 @@ public final class BinUtil {
     }
 
     private static String getProcessName() {
-        String binPathName = System.getProperty("org.graalvm.launcher.executablename");
 
+        String binPathName = System.getProperty("org.graalvm.launcher.executablename");
+        System.out.println("属性:-Dorg.graalvm.launcher.executablename=" + binPathName);
         if (binPathName == null) {
             if (ProcessProperties.getArgumentVectorBlockSize() <= 0) {
                 return null;
