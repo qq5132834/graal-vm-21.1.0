@@ -48,6 +48,7 @@ public class LLVMMultiContextLauncher extends LLVMLauncher {
     private int numOfRuns = DEFAULT_NUMBER_OF_RUNS;
 
     public static void main(String[] args) {
+        System.out.println("启动" + "LLVMMultiContextLauncher");
         new LLVMMultiContextLauncher().launch(args);
     }
 

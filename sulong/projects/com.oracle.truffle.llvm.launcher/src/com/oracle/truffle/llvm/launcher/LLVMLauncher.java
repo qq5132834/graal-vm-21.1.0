@@ -50,6 +50,7 @@ import org.graalvm.polyglot.Value;
 public class LLVMLauncher extends AbstractLanguageLauncher {
 
     public static void main(String[] args) {
+        System.out.println("启动" + "LLVMLauncher");
         new LLVMLauncher().launch(args);
     }
 

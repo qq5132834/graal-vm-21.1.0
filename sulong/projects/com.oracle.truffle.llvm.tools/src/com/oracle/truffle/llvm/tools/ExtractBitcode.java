@@ -85,6 +85,7 @@ public final class ExtractBitcode {
     }
 
     public static void main(String[] args) {
+        System.out.println("启动" + "ExtractBitcode");
         if (args.length != 2) {
             usage(System.err);
             System.exit(1);

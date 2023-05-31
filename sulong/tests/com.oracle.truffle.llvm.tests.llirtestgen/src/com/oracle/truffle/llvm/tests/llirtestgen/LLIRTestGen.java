@@ -692,6 +692,7 @@ public class LLIRTestGen {
     }
 
     public static void main(String[] args) throws IOException {
+        System.out.println("启动" + "LLIRTestGen");
         if (args.length > 3) {
             helpAndDie("Invalid number of arguments");
         }

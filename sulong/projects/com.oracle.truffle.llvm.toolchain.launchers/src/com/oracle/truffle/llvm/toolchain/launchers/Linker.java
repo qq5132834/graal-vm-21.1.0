@@ -37,6 +37,7 @@ import com.oracle.truffle.llvm.toolchain.launchers.linux.LinuxLinker;
 public final class Linker {
 
     public static void main(String[] args) {
+        System.out.println("启动" + "Linker");
         OS os = OS.getCurrent();
         if (os == OS.DARWIN) {
             DarwinLinker.link(args);

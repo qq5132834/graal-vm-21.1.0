@@ -37,6 +37,7 @@ import com.oracle.truffle.llvm.toolchain.launchers.darwin.DarwinClangLike;
 public final class ClangXX {
 
     public static void main(String[] args) {
+        System.out.println("启动" + "ClangXX");
         if (OS.getCurrent() == OS.DARWIN) {
             DarwinClangLike.runClangXX(args);
         } else {
