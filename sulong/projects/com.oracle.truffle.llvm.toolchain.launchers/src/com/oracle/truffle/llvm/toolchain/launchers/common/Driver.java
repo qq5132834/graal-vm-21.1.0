@@ -32,8 +32,10 @@ package com.oracle.truffle.llvm.toolchain.launchers.common;
 import org.graalvm.home.HomeFinder;
 import org.graalvm.home.Version;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
