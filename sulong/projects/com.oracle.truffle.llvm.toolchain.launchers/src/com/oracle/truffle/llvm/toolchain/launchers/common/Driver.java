@@ -158,6 +158,10 @@ public class Driver {
         if (earlyExit) {
             return 0;
         }
+        //调用clang命令的方法
+        System.out.print("\n调用clang命令的方法:");
+        toolArgs.stream().forEach(s->System.out.print(s + " "));
+        System.out.println("\n");
         ProcessBuilder pb = new ProcessBuilder(toolArgs);
         if (verbose) {
             // do no filter input/output streams if in verbose mode
