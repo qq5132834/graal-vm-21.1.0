@@ -175,7 +175,8 @@ public class Driver {
             p = pb.start();
             if (!verbose) {
                 // process IO (if not in verbose mode)
-                processIO(p.getInputStream(), p.getOutputStream(), p.getErrorStream());
+                //processIO(p.getInputStream(), p.getOutputStream(), p.getErrorStream());
+                processIO(p);
             }
             // wait for process termination
             p.waitFor();
@@ -201,6 +202,27 @@ public class Driver {
      * @param errorStream
      */
     protected void processIO(InputStream inputStream, OutputStream outputStream, InputStream errorStream) {
+    }
+
+    /***
+     * show outputs.
+     * @param process
+     */
+    protected void processIO(Process process){
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+            //循环等待进程输出，判断进程存活则循环获取输出流数据
+            System.out.println("log:");
+            while (process.isAlive()) {
+                while (bufferedReader.ready()) {
+                    String s = bufferedReader.readLine();
+                    //自定义进程输出处理
+                    System.out.println("log:" + s);
+                }
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     protected ProcessBuilder setupRedirects(ProcessBuilder pb) {
