@@ -48,7 +48,7 @@ public class LLVMMultiContextLauncher extends LLVMLauncher {
     private int numOfRuns = DEFAULT_NUMBER_OF_RUNS;
 
     public static void main(String[] args) {
-        System.out.println("\n\n\n" + LLVMMultiContextLauncher.class.getSimpleName() + "--sulong");
+        System.out.println("\n\n\n" + LLVMMultiContextLauncher.class.getSimpleName() + "--sulong-main方法程序入口");
         new LLVMMultiContextLauncher().launch(args);
     }
 

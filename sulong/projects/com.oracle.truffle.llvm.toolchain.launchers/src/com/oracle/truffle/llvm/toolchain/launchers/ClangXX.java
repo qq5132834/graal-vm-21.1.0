@@ -37,7 +37,7 @@ import com.oracle.truffle.llvm.toolchain.launchers.darwin.DarwinClangLike;
 public final class ClangXX {
 
     public static void main(String[] args) {
-        System.out.println("\n\n\n" + ClangXX.class.getSimpleName() + "--sulong");
+        System.out.println("\n\n\n" + ClangXX.class.getSimpleName() + "--sulong-main方法程序入口");
         if (OS.getCurrent() == OS.DARWIN) {
             DarwinClangLike.runClangXX(args);
         } else {

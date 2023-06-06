@@ -37,7 +37,7 @@ import com.oracle.truffle.llvm.toolchain.launchers.linux.LinuxLinker;
 public final class Linker {
 
     public static void main(String[] args) {
-        System.out.println("\n\n\n" + Linker.class.getSimpleName() + "--sulong");
+        System.out.println("\n\n\n" + Linker.class.getSimpleName() + "--sulong-main方法程序入口");
         OS os = OS.getCurrent();
         if (os == OS.DARWIN) {
             DarwinLinker.link(args);

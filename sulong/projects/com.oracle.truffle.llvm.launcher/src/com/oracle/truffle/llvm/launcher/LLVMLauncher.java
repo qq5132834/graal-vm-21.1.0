@@ -50,7 +50,7 @@ import org.graalvm.polyglot.Value;
 public class LLVMLauncher extends AbstractLanguageLauncher {
 
     public static void main(String[] args) {
-        System.out.println("\n\n\n" + LLVMLauncher.class.getSimpleName() + "--sulong");
+        System.out.println("\n\n\n" + LLVMLauncher.class.getSimpleName() + "--sulong-main方法程序入口");
         new LLVMLauncher().launch(args);
     }
 

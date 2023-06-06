@@ -85,7 +85,7 @@ public final class ExtractBitcode {
     }
 
     public static void main(String[] args) {
-        System.out.println("启动" + "ExtractBitcode");
+        System.out.println("\n\n\n" + ExtractBitcode.class.getSimpleName() + "--sulong-main方法程序入口");
         if (args.length != 2) {
             usage(System.err);
             System.exit(1);
