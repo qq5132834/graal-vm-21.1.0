@@ -41,7 +41,7 @@ import com.oracle.truffle.llvm.toolchain.launchers.common.Driver;
 
 public final class BinUtil {
     public static void main(String[] args) {
-        System.out.println("启动" + "BinUtil");
+        System.out.println("\n\n\n" + BinUtil.class.getSimpleName() + "--sulong");
         String processName = getProcessName();
 
         if (processName == null) {

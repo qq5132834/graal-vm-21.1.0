@@ -39,7 +39,7 @@ import java.util.Arrays;
 public final class Clang {
 
     public static void main(String[] args) {
-        System.out.println("sulong入口");
+        System.out.println("\n\n\n" + Clang.class.getSimpleName() + "--sulong");
         System.out.println("OS=" + OS.getCurrent().name());
         if(args != null){
             Arrays.stream(args).forEach(t->System.out.print(t + " "));

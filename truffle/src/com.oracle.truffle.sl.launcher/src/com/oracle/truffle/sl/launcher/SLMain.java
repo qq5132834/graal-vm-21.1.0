@@ -61,6 +61,7 @@ public final class SLMain {
      * The main entry point.
      */
     public static void main(String[] args) throws IOException {
+        System.out.println("\n\n\n" + SLMain.class.getSimpleName() + "--sulong");
         Source source;
         Map<String, String> options = new HashMap<>();
         String file = null;
