@@ -42,9 +42,10 @@ public final class Clang {
         System.out.println("\n\n\n" + Clang.class.getSimpleName() + "--sulong-main方法程序入口");
         System.out.println("OS=" + OS.getCurrent().name());
         if(args != null){
-            Arrays.stream(args).forEach(t->System.out.print(t + " "));
+            StringBuilder stringBuilder = new StringBuilder();
+            Arrays.stream(args).forEach(t->stringBuilder.append(t + " "));
+            System.out.println("参数：" + stringBuilder.toString());
         }
-        System.out.println();
         if (OS.getCurrent() == OS.DARWIN) {
             DarwinClangLike.runClang(args);
         } else {

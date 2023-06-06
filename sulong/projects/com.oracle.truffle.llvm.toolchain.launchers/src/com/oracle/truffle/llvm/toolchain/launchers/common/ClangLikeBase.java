@@ -146,9 +146,11 @@ public abstract class ClangLikeBase extends Driver {
 
     protected final void run() {
         List<String> sulongArgs = getArgs();
-        System.out.println("sulongArgs:\n>>>");
-        sulongArgs.stream().forEach(System.out::println);
-        System.out.println("<<<");
+
+        StringBuilder stringBuilder = new StringBuilder();
+        sulongArgs.stream().forEach(t->stringBuilder.append(t + "\n"));
+        System.out.println("sulongArgs:\n>>>\n" + stringBuilder.toString() + "<<<");
+
         runDriver(sulongArgs, Arrays.asList(args), verbose, help, earlyExit);
     }
 
