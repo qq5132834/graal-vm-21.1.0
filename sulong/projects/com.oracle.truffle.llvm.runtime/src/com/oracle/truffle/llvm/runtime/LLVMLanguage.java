@@ -498,6 +498,16 @@ public class LLVMLanguage extends TruffleLanguage<LLVMContext> {
      */
     @Override
     protected CallTarget parse(ParsingRequest request) {
+        //这里来自TruffleLanguage
+        System.out.println(LLVMLanguage.class.getName() + ".parse调用");
+        if (request.getArgumentNames() != null) {
+            StringBuilder stringBuilder = new StringBuilder();
+            request.getArgumentNames().stream().forEach(t->stringBuilder.append(t+" "));
+            System.out.println(stringBuilder.toString());
+        }
+        Source source = request.getSource();
+        System.out.println("Source.className:" + source.getClass().getName());
+
         synchronized (libraryCacheLock) {
             Source source = request.getSource();
             String path = source.getPath();
