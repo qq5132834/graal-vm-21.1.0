@@ -351,6 +351,7 @@ final class ParserDriver {
         int bitcodeID = nextFreeBitcodeID.getAndIncrement();
         LLVMParserRuntime runtime = new LLVMParserRuntime(fileScope, nodeFactory, bitcodeID, file, source.getName(), getSourceFilesWithChecksums(context.getEnv(), module),
                         binaryParserResult.getLocator());
+        System.out.println(ParserDriver.class.getName() + "->parseBinary");
         LLVMParser parser = new LLVMParser(source, runtime);
         LLVMParserResult result = parser.parse(module, targetDataLayout);
         createDebugInfo(module, new LLVMSymbolReadResolver(runtime, new FrameDescriptor(), GetStackSpaceFactory.createAllocaFactory(), targetDataLayout, false));
