@@ -337,6 +337,7 @@ final class ParserDriver {
 
     /**
      * Parses a binary (bitcode with optional meta information from an ELF, Mach-O object file).
+     * 解析二进制（带有ELF、Mach-O对象文件中可选元信息的位代码）。
      */
     private LLVMParserResult parseBinary(BinaryParserResult binaryParserResult, TruffleFile file) {
         ModelModule module = new ModelModule();
