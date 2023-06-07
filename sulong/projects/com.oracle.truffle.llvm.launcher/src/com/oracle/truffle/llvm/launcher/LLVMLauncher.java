@@ -58,7 +58,7 @@ public class LLVMLauncher extends AbstractLanguageLauncher {
         if (args != null) {
             StringBuilder stringBuilder = new StringBuilder();
             Arrays.stream(args).forEach(t->stringBuilder.append(t + " "));
-            System.out.println(LLVMLauncher.class.getSimpleName() + "main参数:" + stringBuilder.toString());
+            System.out.println(LLVMLauncher.class.getSimpleName() + ".main方法的参数:" + stringBuilder.toString());
         }
         new LLVMLauncher().launch(args);
     }
