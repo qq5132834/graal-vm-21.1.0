@@ -51,7 +51,9 @@ import com.oracle.truffle.llvm.runtime.global.LLVMGlobal;
 import com.oracle.truffle.llvm.runtime.options.SulongEngineOption;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class LLVMParser {
     private final Source source;
@@ -66,6 +68,7 @@ public final class LLVMParser {
     }
 
     public LLVMParserResult parse(ModelModule module, DataLayout targetDataLayout) {
+        System.out.println(LLVMParser.class.getSimpleName() + ".parser开始");
         List<GlobalVariable> externalGlobals = new ArrayList<>();
         List<GlobalVariable> definedGlobals = new ArrayList<>();
         List<FunctionSymbol> externalFunctions = new ArrayList<>();
@@ -75,7 +78,25 @@ public final class LLVMParser {
         defineFunctions(module, definedFunctions, externalFunctions, targetDataLayout);
         defineAliases(module.getAliases());
 
-        return new LLVMParserResult(runtime, definedFunctions, externalFunctions, definedGlobals, externalGlobals, targetDataLayout, module.getTargetInformation(TargetTriple.class));
+        LLVMParserResult llvmParserResult = new LLVMParserResult(runtime, definedFunctions, externalFunctions, definedGlobals, externalGlobals, targetDataLayout, module.getTargetInformation(TargetTriple.class));
+
+        //TODO 查看一下结果
+        List<FunctionSymbol> definedFunctionSymbolList = llvmParserResult.getDefinedFunctions();
+        definedFunctionSymbolList.stream().forEach(functionSymbol -> {
+            Map<String, String> map = new HashMap<>();
+            map.put("name", functionSymbol.getName());
+            map.put("index", String.valueOf(functionSymbol.getIndex()));
+            System.out.println("definedFunctionSymbolList:"+map.toString());
+        });
+        List<FunctionSymbol> externalFunctionSymbolList = llvmParserResult.getExternalFunctions();
+        externalFunctionSymbolList.stream().forEach(functionSymbol -> {
+            Map<String, String> map = new HashMap<>();
+            map.put("name", functionSymbol.getName());
+            map.put("index", String.valueOf(functionSymbol.getIndex()));
+            System.out.println("externalFunctionSymbolList:"+map.toString());
+        });
+        System.out.println(LLVMParser.class.getSimpleName() + ".parser完成");
+        return llvmParserResult;
     }
 
     private void defineGlobals(List<GlobalVariable> globals, List<GlobalVariable> definedGlobals, List<GlobalVariable> externalGlobals) {

@@ -51,6 +51,7 @@ public class LLVMLauncher extends AbstractLanguageLauncher {
 
     /***
      * mx lli hello.bc/hello.out
+     * 根据官方文档，lli 命令支持执行 .bc 格式的 LLVM 字节码文件，但不直接支持执行 .ll 格式的 LLVM IR 文本文件。
      */
     public static void main(String[] args) {
         System.out.println("\n\n\n" + LLVMLauncher.class.getSimpleName() + "--sulong-main方法程序入口");
