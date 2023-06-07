@@ -58,9 +58,9 @@ public final class LLVMParser {
     private final LLVMParserRuntime runtime;
 
     public LLVMParser(Source source, LLVMParserRuntime runtime) {
-        System.out.println("文件路径:\n" + source.getPath());
-        System.out.println("文件语言:\n" + source.getLanguage());
-        System.out.println("文件内容:\n" + source.getCharacters());
+        System.out.println("LLVMParser文件路径:\n" + source.getPath());
+        System.out.println("LLVMParser文件语言:\n" + source.getLanguage());
+        //System.out.println("LLVMParser文件内容:\n" + source.getCharacters());
         this.source = source;
         this.runtime = runtime;
     }
