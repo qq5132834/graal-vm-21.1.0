@@ -95,6 +95,7 @@ public final class LLVMParser {
             map.put("index", String.valueOf(functionSymbol.getIndex()));
             System.out.println("externalFunctionSymbolList:"+map.toString());
         });
+        System.out.println(llvmParserResult.toString());
         System.out.println(LLVMParser.class.getSimpleName() + ".parser完成");
         return llvmParserResult;
     }
