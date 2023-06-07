@@ -49,8 +49,17 @@ import org.graalvm.polyglot.Value;
 
 public class LLVMLauncher extends AbstractLanguageLauncher {
 
+    /***
+     * mx lli hello.bc/hello.out
+     */
     public static void main(String[] args) {
         System.out.println("\n\n\n" + LLVMLauncher.class.getSimpleName() + "--sulong-main方法程序入口");
+
+        if (args != null) {
+            StringBuilder stringBuilder = new StringBuilder();
+            Arrays.stream(args).forEach(t->stringBuilder.append(t + " "));
+            System.out.println(LLVMLauncher.class.getSimpleName() + "main参数:" + stringBuilder.toString());
+        }
         new LLVMLauncher().launch(args);
     }
 
